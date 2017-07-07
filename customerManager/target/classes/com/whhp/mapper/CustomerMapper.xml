@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whhp.mapper.CustomerMapper">
+	<resultMap type="customer" id="customerMap">
+		<id column="cusNo" property="cusNo" />
+		<result column="cusName" property="cusName" />
+		<result column="sex" property="sex" />
+		<result column="hireDate" property="hireDate" />
+		<result column="deptNo" property="deptNo" />
+		<association property="dept" column="deptNo" javaType="department"
+			resultMap="deptMap"></association>
+	</resultMap>
+	<resultMap type="department" id="deptMap">
+		<id column="deptNo" property="deptNo" />
+		<result column="deptName" property="deptName" />
+	</resultMap>
+	<select id="queryAll" resultMap="customerMap">
+		SELECT
+		cu.`cusNo`,
+		cu.`cusName`,
+		cu.`sex`,
+		cu.`hireDate`,
+		cu.`deptNo`,
+		dept.`deptName`
+		FROM
+		`customer` cu
+		INNER JOIN department dept
+		ON dept.`deptNo` = cu.`deptNo`
+		order by cusNo
+	</select>
+	<delete id="remove" parameterType="int">
+		delete from customer where
+		cusNo=#{id}
+	</delete>
+	<select id="showInfo" parameterType="int" resultMap="customerMap">
+		SELECT
+		cu.`cusNo`,
+		cu.`cusName`,
+		cu.`sex`,
+		cu.`hireDate`,
+		cu.`deptNo`,
+		dept.`deptName`
+		FROM
+		`customer` cu
+		INNER JOIN department dept
+		ON
+		dept.`deptNo` = cu.`deptNo`
+		WHERE cu.cusNo = #{id}
+	</select>
+	<update id="updateInfo" parameterType="customer">
+		update `customer`
+		set
+		`cusNo` = #{cusNo},
+		`cusName` = #{cusName},
+		`sex` = #{sex},
+		`hireDate` =
+		#{hireDate},
+		`deptNo` = #{deptNo}
+		where `cusNo` = #{cusNo};
+	</update>
+	<insert id="addInfo" parameterType="customer">
+		INSERT INTO `customer` (
+		`cusNo`,
+		`cusName`,
+		`sex`,
+		`hireDate`,
+		`deptNo`
+		)
+		VALUES
+		(
+		null,
+		#{cusName},
+		#{sex},
+		#{hireDate},
+		#{deptNo}
+		);
+	</insert>
+	<select id="getRows" parameterType="String" resultType="long">
+		SELECT
+		COUNT(1)
+		FROM
+		`customer`
+		<where>
+			<if test="_parameter!=0">
+				`deptNo` = #{deptNo}
+			</if>
+		</where>
+	</select>
+	<select id="selectedQuery" parameterType="map" resultMap="customerMap">
+		SELECT
+		cu.`cusNo`,
+		cu.`cusName`,
+		cu.`sex`,
+		cu.`hireDate`,
+		cu.`deptNo`,
+		dept.`deptName`
+		FROM
+		`customer` cu
+		INNER JOIN department dept
+		ON
+		dept.`deptNo` = cu.`deptNo`
+		<where>
+			<if test="deptNo!=0">
+				cu.`deptNo` = #{deptNo}
+			</if>
+		</where>
+		LIMIT #{preLimit}, #{aftLimit};
+	</select>
+</mapper>

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+ 	http://www.springframework.org/schema/beans 
+ 	http://www.springframework.org/schema/beans/spring-beans-4.3.xsd 
+ 	http://www.springframework.org/schema/aop 
+ 	http://www.springframework.org/schema/aop/spring-aop-4.3.xsd 
+ 	http://www.springframework.org/schema/mvc 
+ 	http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd 
+ 	http://www.springframework.org/schema/context 
+ 	http://www.springframework.org/schema/context/spring-context-4.3.xsd 
+ 	http://www.springframework.org/schema/tx 
+ 	http://www.springframework.org/schema/tx/spring-tx-4.3.xsd ">
+	<!-- mybatis -->
+	<context:property-placeholder location="classpath:properties/jdbc.properties"/>
+	<!-- 数据库连接 -->
+	<bean id="ds" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="driverClassName" value="${jdbc.driver}"/>
+	</bean>
+	<!-- sqlSessionFactory -->
+	<bean id="ssf" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="ds"></property>
+		<property name="mapperLocations" value="classpath:com/whhp/mapper/*.xml"></property>	
+		<property name="typeAliasesPackage" value="com.whhp.pojo"></property>
+	</bean>
+	<!-- 扫描接口 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="ssf"></property>
+		<property name="basePackage" value="com.whhp.mapper"></property>
+	</bean>
+	
+	<!-- 事务处理 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="ds"></property>
+	</bean>	
+	<!-- 开启事务控制 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/> 
+	
+	<!-- spring-mvc -->
+	<!-- 直接加载包下的所有文件 -->
+	<context:component-scan base-package="com.whhp.controllers,com.whhp.service.impl"></context:component-scan>
+	<!-- HandlerMapping -->
+	<!-- 启用注解 -->
+	<mvc:annotation-driven />
+	<!-- 视图解析器 ViewResolver -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+</beans>
